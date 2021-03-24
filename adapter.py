@@ -1,10 +1,10 @@
 from bridge import Bridge
+import os
 
 
 class Adapter:
-    base_url = 'https://min-api.cryptocompare.com/data/price'
-    from_params = ['base', 'from', 'coin']
-    to_params = ['quote', 'to', 'market']
+    base_url = 'https://api.twitter.com/1.1/search/tweets.json'
+    code_params = ['code', 'verification_code', 'hashtag']
 
     def __init__(self, input):
         self.id = input.get('id', '1')
@@ -24,24 +24,24 @@ class Adapter:
         return True
 
     def set_params(self):
-        for param in self.from_params:
-            self.from_param = self.request_data.get(param)
-            if self.from_param is not None:
-                break
-        for param in self.to_params:
-            self.to_param = self.request_data.get(param)
-            if self.to_param is not None:
+        for param in self.code_params:
+            self.code_param = self.request_data.get(param)
+            if self.code_param is not None:
                 break
 
     def create_request(self):
         try:
             params = {
-                'fsym': self.from_param,
-                'tsyms': self.to_param,
+                'q': '#' + self.code_param,
             }
-            response = self.bridge.request(self.base_url, params)
+            headers = {
+                "Authorization": "Bearer " + os.environ.get('BEARER_TOKEN')}
+            response = self.bridge.request(self.base_url, params, headers=headers)
             data = response.json()
-            self.result = data[self.to_param]
+            if data['statuses']:
+                self.result = data['statuses'][0]['user']['id']
+            else:
+                self.result = 0
             data['result'] = self.result
             self.result_success(data)
         except Exception as e:

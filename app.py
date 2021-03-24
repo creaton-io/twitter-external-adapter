@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, request, jsonify
 
 from adapter import Adapter
@@ -21,4 +23,7 @@ def call_adapter():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port='8080', threaded=True)
+    if not os.environ.get('BEARER_TOKEN'):
+        print('BEARER_TOKEN not set, quitting')
+    else:
+        app.run(debug=True, host='0.0.0.0', port='8080', threaded=True)

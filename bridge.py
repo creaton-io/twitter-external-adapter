@@ -23,7 +23,7 @@ class Bridge(object):
         self.session.mount('http://', adapter)
         self.session.mount('https://', adapter)
 
-    def request(self, url, params={}, headers={}, timeout=15):
+    def request(self, url, params, headers, timeout=15):
         try:
             return self.session.get(url,
                                     params=params,
