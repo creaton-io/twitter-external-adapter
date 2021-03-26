@@ -4,14 +4,14 @@ import os
 
 class Adapter:
     base_url = 'https://api.twitter.com/1.1/search/tweets.json'
-    code_params = ['code', 'verification_code', 'hashtag']
 
     def __init__(self, input):
         self.id = input.get('id', '1')
         self.request_data = input.get('data')
         if self.validate_request_data():
             self.bridge = Bridge()
-            self.set_params()
+            self.hashtag = self.request_data.get('hashtag', '')
+            self.username = self.request_data.get('username', '')
             self.create_request()
         else:
             self.result_error('No data provided')
@@ -23,25 +23,26 @@ class Adapter:
             return False
         return True
 
-    def set_params(self):
-        for param in self.code_params:
-            self.code_param = self.request_data.get(param)
-            if self.code_param is not None:
-                break
-
     def create_request(self):
         try:
+            if not self.hashtag:
+                raise Exception('No hashtag provided')
             params = {
-                'q': '#' + self.code_param,
+                'q': '#' + self.hashtag,
             }
             headers = {
                 "Authorization": "Bearer " + os.environ.get('BEARER_TOKEN')}
             response = self.bridge.request(self.base_url, params, headers=headers)
             data = response.json()
-            if data['statuses']:
-                self.result = data['statuses'][0]['user']['id']
-            else:
-                self.result = 0
+            self.result = ''
+            if self.username:
+                for status in data['statuses']:
+                    if status['user']['name'] == self.username:
+                        self.result = self.username
+                        break
+            elif data['statuses']:
+                self.result = data['statuses'][0]['user']['name']
+
             data['result'] = self.result
             self.result_success(data)
         except Exception as e:
