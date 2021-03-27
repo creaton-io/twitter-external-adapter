@@ -37,11 +37,11 @@ class Adapter:
             self.result = ''
             if self.username:
                 for status in data['statuses']:
-                    if status['user']['name'] == self.username:
+                    if status['user']['screen_name'] == self.username:
                         self.result = self.username
                         break
             elif data['statuses']:
-                self.result = data['statuses'][0]['user']['name']
+                self.result = data['statuses'][0]['user']['screen_name']
 
             data['result'] = self.result
             self.result_success(data)
